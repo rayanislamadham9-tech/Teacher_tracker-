@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Payment Tracker - All Subjects</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            font-family: 'Quicksand', -apple-system, system-ui, sans-serif;
+            padding: 1.5rem 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .tracker-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        @media (min-width: 768px) {
+            .tracker-container {
+                padding: 2rem;
+            }
+        }
+
+        .subject-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .subject-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        @media (min-width: 768px) {
+            .subject-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        .subject-icon {
+            font-size: 1.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .progress-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .progress-badge.complete {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .days-grid {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        .day-button {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border: 3px solid #d0d0d0;
+            border-radius: 12px;
+            padding: 1rem 0.5rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .day-button:active {
+            transform: scale(0.95);
+        }
+
+        .day-button.checked {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #0d8070;
+            box-shadow: 0 6px 16px rgba(17, 153, 142, 0.4);
+            transform: scale(1.05);
+        }
+
+        .day-number {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #555;
+            transition: color 0.3s;
+        }
+
+        @media (min-width: 768px) {
+            .day-number {
+                font-size: 1.3rem;
+            }
+        }
+
+        .day-button.checked .day-number {
+            color: white;
+        }
+
+        .checkmark {
+            font-size: 1.5rem;
+            animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes checkPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .reset-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 87, 108, 0.4);
+        }
+
+        .reset-button:active {
+            transform: translateY(0);
+        }
+
+        .completion-banner {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: center;
+            box-shadow: 0 6px 16px rgba(17, 153, 142, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .completion-text {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer-text {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .reset-all-container {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .reset-all-button {
+            background: linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(252, 92, 125, 0.3);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .reset-all-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(252, 92, 125, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">📚 Teacher Payment Tracker</h1>
+            <p class="page-subtitle">Track all 5 teachers - 12 days each before payment</p>
+        </div>
+
+        <!-- Bangla Tracker -->
+        <div class="tracker-container" id="tracker-bangla">
+            <div class="subject-header">
+                <h2 class="subject-title">
+                    <span class="subject-icon">🇧🇩</span>
+                    Bangla Teacher
+                </h2>
+                <div class="progress-info">
+                    <span class="progress-badge" id="badge-bangla">0/12</span>
+                    <button class="reset-button" onclick="resetTracker('bangla')">Reset</button>
+                </div>
+            </div>
+            <div class="completion-banner hidden" id="complete-bangla">
+                <div class="completion-text">✅ Complete! Time to pay Bangla teacher</div>
+            </div>
+            <div class="days-grid" id="grid-bangla"></div>
+        </div>
+
+        <!-- English Tracker -->
+        <div class="tracker-container" id="tracker-english">
+            <div class="subject-header">
+                <h2 class="subject-title">
+                    <span class="subject-icon">🇬🇧</span>
+                    English Teacher
+                </h2>
+                <div class="progress-info">
+                    <span class="progress-badge" id="badge-english">0/12</span>
+                    <button class="reset-button" onclick="resetTracker('english')">Reset</button>
+                </div>
+            </div>
+            <div class="completion-banner hidden" id="complete-english">
+                <div class="completion-text">✅ Complete! Time to pay English teacher</div>
+            </div>
+            <div class="days-grid" id="grid-english"></div>
+        </div>
+
+        <!-- Math Tracker -->
+        <div class="tracker-container" id="tracker-math">
+            <div class="subject-header">
+                <h2 class="subject-title">
+                    <span class="subject-icon">🔢</span>
+                    Math Teacher
+                </h2>
+                <div class="progress-info">
+                    <span class="progress-badge" id="badge-math">0/12</span>
+                    <button class="reset-button" onclick="resetTracker('math')">Reset</button>
+                </div>
+            </div>
+            <div class="completion-banner hidden" id="complete-math">
+                <div class="completion-text">✅ Complete! Time to pay Math teacher</div>
+            </div>
+            <div class="days-grid" id="grid-math"></div>
+        </div>
+
+        <!-- Physics & Chemistry Tracker -->
+        <div class="tracker-container" id="tracker-physics">
+            <div class="subject-header">
+                <h2 class="subject-title">
+                    <span class="subject-icon">⚛️</span>
+                    Physics & Chemistry Teacher
+                </h2>
+                <div class="progress-info">
+                    <span class="progress-badge" id="badge-physics">0/12</span>
+                    <button class="reset-button" onclick="resetTracker('physics')">Reset</button>
+                </div>
+            </div>
+            <div class="completion-banner hidden" id="complete-physics">
+                <div class="completion-text">✅ Complete! Time to pay Physics & Chemistry teacher</div>
+            </div>
+            <div class="days-grid" id="grid-physics"></div>
+        </div>
+
+        <!-- Biology Tracker -->
+        <div class="tracker-container" id="tracker-biology">
+            <div class="subject-header">
+                <h2 class="subject-title">
+                    <span class="subject-icon">🧬</span>
+                    Biology Teacher
+                </h2>
+                <div class="progress-info">
+                    <span class="progress-badge" id="badge-biology">0/12</span>
+                    <button class="reset-button" onclick="resetTracker('biology')">Reset</button>
+                </div>
+            </div>
+            <div class="completion-banner hidden" id="complete-biology">
+                <div class="completion-text">✅ Complete! Time to pay Biology teacher</div>
+            </div>
+            <div class="days-grid" id="grid-biology"></div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-text">
+                <strong>How to use:</strong> Click on each day box when the teacher completes a class. 
+                The boxes will turn <strong style="color: #11998e;">bright green ✓</strong> when checked. 
+                When all 12 days are green, it's time to pay that teacher!
+            </div>
+        </div>
+
+        <div class="reset-all-container">
+            <button class="reset-all-button" onclick="resetAll()">Reset All Teachers</button>
+        </div>
+    </div>
+
+    <script>
+        const subjects = ['bangla', 'english', 'math', 'physics', 'biology'];
+        const trackerData = {};
+
+        // Initialize all trackers
+        subjects.forEach(subject => {
+            trackerData[subject] = [];
+        });
+
+        // Load saved data
+        function loadData() {
+            subjects.forEach(subject => {
+                const saved = localStorage.getItem(`teacher-tracker-${subject}`);
+                if (saved) {
+                    trackerData[subject] = JSON.parse(saved);
+                }
+            });
+            updateAllUI();
+        }
+
+        // Save data for a subject
+        function saveData(subject) {
+            localStorage.setItem(`teacher-tracker-${subject}`, JSON.stringify(trackerData[subject]));
+        }
+
+        // Toggle day for a subject
+        function toggleDay(subject, dayNumber) {
+            const index = trackerData[subject].indexOf(dayNumber);
+            if (index > -1) {
+                trackerData[subject].splice(index, 1);
+            } else {
+                trackerData[subject].push(dayNumber);
+                
+                // Show confetti if all days are complete
+                if (trackerData[subject].length === 12) {
+                    showConfetti();
+                }
+            }
+            saveData(subject);
+            updateUI(subject);
+        }
+
+        // Reset tracker for a subject
+        function resetTracker(subject) {
+            if (confirm(`Reset ${subject.charAt(0).toUpperCase() + subject.slice(1)} teacher tracker?`)) {
+                trackerData[subject] = [];
+                saveData(subject);
+                updateUI(subject);
+            }
+        }
+
+        // Reset all trackers
+        function resetAll() {
+            if (confirm('Reset ALL teacher trackers? This will clear all progress.')) {
+                subjects.forEach(subject => {
+                    trackerData[subject] = [];
+                    saveData(subject);
+                    updateUI(subject);
+                });
+            }
+        }
+
+        // Update UI for a specific subject
+        function updateUI(subject) {
+            const checkedDays = trackerData[subject];
+            const isComplete = checkedDays.length === 12;
+            
+            // Update badge
+            const badge = document.getElementById(`badge-${subject}`);
+            badge.textContent = `${checkedDays.length}/12`;
+            if (isComplete) {
+                badge.classList.add('complete');
+            } else {
+                badge.classList.remove('complete');
+            }
+            
+            // Show/hide completion banner
+            const completionBanner = document.getElementById(`complete-${subject}`);
+            if (isComplete) {
+                completionBanner.classList.remove('hidden');
+            } else {
+                completionBanner.classList.add('hidden');
+            }
+            
+            // Update day buttons
+            const grid = document.getElementById(`grid-${subject}`);
+            grid.innerHTML = '';
+            
+            for (let i = 1; i <= 12; i++) {
+                const isChecked = checkedDays.includes(i);
+                const button = document.createElement('button');
+                button.className = 'day-button' + (isChecked ? ' checked' : '');
+                button.onclick = () => toggleDay(subject, i);
+                
+                button.innerHTML = `
+                    <div class="day-number">Day ${i}</div>
+                    ${isChecked ? '<div class="checkmark">✓</div>' : ''}
+                `;
+                
+                grid.appendChild(button);
+            }
+        }
+
+        // Update all UIs
+        function updateAllUI() {
+            subjects.forEach(subject => updateUI(subject));
+        }
+
+        // Show confetti
+        function showConfetti() {
+            const colors = ['#11998e', '#38ef7d', '#4ecdc4', '#ffe66d', '#ff8b94'];
+            
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 30);
+            }
+        }
+
+        // Initialize on load
+        loadData();
+    </script>
+</body>
+</html>
